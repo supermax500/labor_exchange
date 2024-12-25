@@ -16,7 +16,7 @@ class JobRepository(IRepositoryAsync):
     def __init__(self, session: Callable[..., AbstractContextManager[Session]]):
         self.session = session
 
-    async def create(self, job_create_dto: JobCreateSchema, hashed_password: str) -> JobModel:
+    async def create(self, job_create_dto: JobCreateSchema) -> JobModel:
         async with self.session() as session:
             job = Job(
                 id=job_create_dto.id,
@@ -60,34 +60,32 @@ class JobRepository(IRepositoryAsync):
             jobs_from_db = res.scalars().all()
 
         job_models = []
-        for user in jobs_from_db:
-            model = self.__to_job_model(job_from_db=user, include_relations=include_relations)
+        for job in jobs_from_db:
+            model = self.__to_job_model(job_from_db=job, include_relations=include_relations)
             job_models.append(model)
 
         return job_models
 
-    async def update(self, id: int, job_update_dto: JobUpdateSchema) -> UserModel:
+    async def update(self, id: int, job_update_dto: JobUpdateSchema) -> JobModel:
         async with self.session() as session:
             query = select(Job).filter_by(id=id).limit(1)
             res = await session.execute(query)
             job_from_db = res.scalars().first()
 
             if not job_from_db:
-                raise ValueError("Пользователь не найден")
+                raise ValueError("Вакансия не найдена")
 
-            name = job_update_dto.name if job_update_dto.name is not None else job_from_db.name
-            email = (
-                job_update_dto.email if job_update_dto.email is not None else job_from_db.email
-            )
-            is_company = (
-                job_update_dto.is_company
-                if job_update_dto.is_company is not None
-                else job_from_db.is_company
-            )
+            title = job_update_dto.title if job_update_dto.title is not None else job_from_db.title
+            description = job_update_dto.description if job_update_dto.description is not None else job_from_db.description
+            salary_from = job_update_dto.salary_from if job_update_dto.salary_from is not None else job_from_db.salary_from
+            salary_to = job_update_dto.salary_to if job_update_dto.salary_to is not None else job_from_db.salary_to
+            is_active = job_update_dto.is_active if job_update_dto.is_active is not None else job_from_db.is_active
 
-            job_from_db.name = name
-            job_from_db.email = email
-            job_from_db.is_company = is_company
+            job_from_db.title = title
+            job_from_db.description = description
+            job_from_db.salary_from = salary_from
+            job_from_db.salary_to = salary_to
+            job_from_db.is_active = is_active
 
             session.add(job_from_db)
             await session.commit()

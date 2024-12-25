@@ -13,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 
 from config import DBSettings
 from main import app
-from repositories import UserRepository
+from repositories import UserRepository, JobRepository
 from tools.fixtures.users import UserFactory
 
 env_file_name = ".env." + os.environ.get("STAGE", "test")
@@ -69,6 +69,12 @@ async def sa_session():
 @pytest_asyncio.fixture(scope="function")
 async def user_repository(sa_session):
     repository = UserRepository(session=sa_session)
+    yield repository
+
+
+@pytest_asyncio.fixture(scope="function")
+async def job_repository(sa_session):
+    repository = JobRepository(session=sa_session)
     yield repository
 
 
