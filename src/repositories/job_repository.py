@@ -116,6 +116,7 @@ class JobRepository(IRepositoryAsync):
 
         if job_from_db:
             if include_relations:
+                job_user = job_from_db.user
                 job_responses = [
                     ResponseModel(
                         id=response.id,
@@ -126,6 +127,7 @@ class JobRepository(IRepositoryAsync):
                     for response in job_from_db.responses
                 ]
 
+
             job_model = JobModel(
                 id=job_from_db.id,
                 user_id=job_from_db.user_id,
@@ -134,7 +136,7 @@ class JobRepository(IRepositoryAsync):
                 salary_from=job_from_db.salary_from,
                 salary_to=job_from_db.salary_to,
                 is_active=job_from_db.is_active,
-                #user=job_user,
+                user=job_user,
                 responses=job_responses,
             )
 
