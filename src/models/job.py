@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from decimal import Decimal
 
+from .user import User
 from .response import Response
 
 
@@ -14,4 +15,5 @@ class Job:
     salary_to: Decimal
     is_active: bool
 
+    user: User = field(default_factory=User)
     responses: list[Response] = field(default_factory=list)
