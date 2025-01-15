@@ -1,9 +1,8 @@
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from .user import User
-from .response import Response
-
+from models.response import Response
+from models.user import User
 
 @dataclass
 class Job:
