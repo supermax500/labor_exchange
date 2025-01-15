@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-from models.job import Job
+if TYPE_CHECKING:
+    from models.job import Job
 from models.response import Response
 
 
@@ -12,5 +14,5 @@ class User:
     hashed_password: str
     is_company: bool
 
-    jobs: list[Job] = field(default_factory=list)
+    jobs: list["Job"] = field(default_factory=list)
     responses: list[Response] = field(default_factory=list)

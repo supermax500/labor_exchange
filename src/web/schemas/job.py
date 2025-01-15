@@ -2,7 +2,6 @@ from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel, field_validator
-from typing_extensions import Self
 
 
 class JobSchema(BaseModel):
@@ -15,9 +14,9 @@ class JobSchema(BaseModel):
     is_active: bool | None = False
 
 
-def valid_salary_range(self) -> None:
-    a = self.salary_from
-    b = self.salary_to
+def valid_salary_range(salary_from, salary_to) -> None:
+    a = salary_from
+    b = salary_to
     if a is not None and b is not None:
         if a < 0 or b < 0:
             raise ValueError("Salary must be non-negative")
