@@ -1,11 +1,15 @@
+from dataclasses import asdict
+
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from dependencies import get_current_user
 from dependencies.containers import RepositoriesContainer
 from storage.sqlalchemy.tables import Job
-from web.schemas.job import JobSchema
+from web.schemas.job import JobSchema, JobCreateSchema
+from models.user import User
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -34,3 +38,16 @@ async def read_jobs(
 
     return jobs_schema
 
+
+@router.post("")
+@inject
+async def create_job(
+        job_create_schema: JobCreateSchema,
+        job_repository: RepositoriesContainer = Depends(RepositoriesContainer.job_repository),
+        current_user: User = Depends(get_current_user),
+) -> JobSchema:
+
+    if job_create_schema.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    job_model = job_repository.create(job_create_schema)
+    return JobSchema(**asdict(job_model))
