@@ -26,7 +26,6 @@ def valid_salary_range(salary_from, salary_to) -> None:
 
 
 class JobCreateSchema(BaseModel):
-    user_id: int
     title: str | None = None
     description: str | None = None
     salary_from: Decimal | None = None
@@ -37,6 +36,7 @@ class JobCreateSchema(BaseModel):
 
 
 class JobUpdateSchema(BaseModel):
+    id: int
     title: Optional[str] = None
     description: Optional[str] = None
     salary_from: Optional[Decimal] = None

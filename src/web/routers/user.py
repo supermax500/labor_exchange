@@ -35,6 +35,24 @@ async def read_users(
     return users_schema
 
 
+@router.get("/{user_id}")
+@inject
+async def read_user(
+    user_id: int,
+    limit: int = 100,
+    skip: int = 0,
+    user_repository: UserRepository = Depends(Provide[RepositoriesContainer.user_repository]),
+) -> UserSchema:
+    user_model = await user_repository.retrieve(id=user_id)
+
+    return UserSchema(
+        id=user_model.id,
+        name=user_model.name,
+        email=user_model.email,
+        is_company=user_model.is_company,
+    )
+
+
 @router.post("")
 @inject
 async def create_user(

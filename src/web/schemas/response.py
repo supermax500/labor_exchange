@@ -7,3 +7,11 @@ class ResponseSchema(BaseModel):
     job_id: int
     user_id: int
     message: str
+
+class ResponseCreateSchema(BaseModel):
+    job_id: int
+    message: str
+
+class ResponseUpdateSchema(BaseModel):
+    id: int
+    message: str

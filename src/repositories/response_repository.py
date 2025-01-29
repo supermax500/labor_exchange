@@ -9,17 +9,17 @@ from models import Job as JobModel
 from models import Response as ResponseModel
 from models import User as UserModel
 from storage.sqlalchemy.tables import Response
-from web.schemas import ResponseCreateSchema, ResponseUpdateSchema
+from web.schemas import ResponseCreateSchema, ResponseUpdateSchema, ResponseSchema
 
 
 class ResponseRepository(IRepositoryAsync):
     def __init__(self, session: Callable[..., AbstractContextManager[Session]]):
         self.session = session
 
-    async def create(self, response_create_dto: ResponseCreateSchema) -> ResponseModel:
+    async def create(self, response_create_dto: ResponseSchema) -> ResponseModel:
         async with self.session() as session:
             response = Response(
-                id=response_create_dto.id,
+                #id=response_create_dto.id,
                 user_id=response_create_dto.user_id,
                 job_id=response_create_dto.job_id,
                 message=response_create_dto.message,
@@ -63,7 +63,7 @@ class ResponseRepository(IRepositoryAsync):
 
         return response_models
 
-    async def update(self, id: int, response_update_dto: ResponseUpdateSchema) -> ResponseModel:
+    async def update(self, id: int, response_update_dto: ResponseSchema) -> ResponseModel:
         async with self.session() as session:
             query = select(Response).filter_by(id=id).limit(1)
             res = await session.execute(query)
