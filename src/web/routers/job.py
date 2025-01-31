@@ -42,12 +42,10 @@ async def read_jobs(
 @inject
 async def read_job(
     job_id: int,
-    limit: int = 100,
-    skip: int = 0,
     job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
 ) -> list[JobSchema]:
 
-    jobs_model = await job_repository.retrieve(id=job_id, limit=limit, skip=skip)
+    jobs_model = await job_repository.retrieve(id=job_id)
 
     jobs_schema = []
     for job in jobs_model:
@@ -56,8 +54,8 @@ async def read_job(
             user_id=job.user_id,
             title=job.title,
             description=job.description,
-            salary_to=job.salary_to,
             salary_from=job.salary_from,
+            salary_to=job.salary_to,
             is_active=job.is_active,
         ))
 
@@ -72,14 +70,12 @@ async def create_job(
     current_user: User = Depends(get_current_user),
 ) -> JobSchema:
 
-    #if job_create_schema.user_id != current_user.id:
-    #    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     job_model = await job_repository.create(JobSchema(
         user_id=current_user.id,
         title=job_create_schema.title,
         description=job_create_schema.description,
-        salary_to=job_create_schema.salary_to,
         salary_from=job_create_schema.salary_from,
+        salary_to=job_create_schema.salary_to,
         is_active=job_create_schema.is_active,
     ))
     return JobSchema(**asdict(job_model))
@@ -96,7 +92,6 @@ async def update_job(
     existing_job = job_repository.retrieve(id=job_update_schema.id)
     if existing_job is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Несуществующая вакансия")
-    #existing_user = user_repository.retrieve(id=current_user.id)
     if existing_job.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Недостаточно прав")
     job_model = await job_repository.update(JobSchema(
@@ -104,8 +99,8 @@ async def update_job(
         user_id=current_user.id,
         title=job_update_schema.title,
         description=job_update_schema.description,
-        salary_to=job_update_schema.salary_to,
         salary_from=job_update_schema.salary_from,
+        salary_to=job_update_schema.salary_to,
         is_active=job_update_schema.is_active,
     ))
     return JobSchema(**asdict(job_model))

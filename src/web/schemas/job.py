@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel, field_validator
+from pydantic_core.core_schema import ValidationInfo
 
 
 class JobSchema(BaseModel):
@@ -14,8 +15,8 @@ class JobSchema(BaseModel):
     is_active: bool | None = False
 
 
-def valid_salary_range(salary_from, salary_to) -> None:
-    a = salary_from
+def valid_salary_range(salary_to: Decimal, validation_context: ValidationInfo) -> None:
+    a = validation_context.data["salary_from"]
     b = salary_to
     if a is not None and b is not None:
         if a < 0 or b < 0:
@@ -26,13 +27,13 @@ def valid_salary_range(salary_from, salary_to) -> None:
 
 
 class JobCreateSchema(BaseModel):
-    title: str | None = None
-    description: str | None = None
+    title: str
+    description: str
     salary_from: Decimal | None = None
     salary_to: Decimal | None = None
     is_active: bool | None = False
 
-    check_salary = field_validator("salary_from", "salary_to", mode='after')(valid_salary_range)
+    check_salary = field_validator("salary_to", mode='after')(valid_salary_range)
 
 
 class JobUpdateSchema(BaseModel):
@@ -43,4 +44,4 @@ class JobUpdateSchema(BaseModel):
     salary_to: Optional[Decimal] = None
     is_active: Optional[bool] = False
 
-    check_salary = field_validator("salary_from", "salary_to", mode='after')(valid_salary_range)
+    check_salary = field_validator("salary_to", mode='after')(valid_salary_range)

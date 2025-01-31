@@ -16,11 +16,11 @@ class Job(Base):
     )
 
     # добавьте ваши колонки сюда
-    title: Mapped[str] = mapped_column(nullable=True, comment="Название вакансии")
-    description: Mapped[str] = mapped_column(nullable=True, comment="Описание вакансии")
+    title: Mapped[str] = mapped_column(comment="Название вакансии")
+    description: Mapped[str] = mapped_column(comment="Описание вакансии")
     salary_from: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True, comment="Зарплата от")
     salary_to: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=True, comment="Зарплата до")
-    is_active: Mapped[bool] = mapped_column(nullable=True, comment="Активна ли вакансия")
+    is_active: Mapped[bool] = mapped_column(default=False, comment="Активна ли вакансия")
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, comment="Дата создания записи")
 
     user: Mapped["User"] = relationship(back_populates="jobs")  # noqa

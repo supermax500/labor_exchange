@@ -16,32 +16,52 @@ router = APIRouter(prefix="/responses", tags=["responses"])
 async def get_all(
     limit: int = 100,
     skip: int = 0,
+    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.get_repository]),
     response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
     responses_from_db = await response_repository.retrieve_many(limit=limit, skip=skip)
-    return responses_from_db
+
+    user_jobs = await job_repository.retrieve_many(limit=limit, skip=skip, user_id=current_user.id)
+    current_user_jobs_ids = [job.id for job in user_jobs]
+
+    result = []
+    for response in responses_from_db:
+        if response.user_id == current_user.id or response.job_id in current_user_jobs_ids:
+            result.append(ResponseSchema(
+                id=response.id,
+                user_id=response.user_id,
+                job_id=response.job_id,
+                message=response.message,
+            ))
+    return result
 
 
 @router.get("/{id}")
 @inject
 async def get_by_id(
     id: int,
-    limit: int = 100,
-    skip: int = 0,
     response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    current_user: User = Depends(get_current_user),
 ) -> ResponseSchema:
     result = await response_repository.retrieve(id=id)
+    if result.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недостаточно прав")
     return result
 
 
-@router.get("/user/{user_id}")
+@router.get("/users/{user_id}")
 @inject
 async def get_by_user_id(
     user_id: int,
     limit: int = 100,
     skip: int = 0,
     response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
+    if user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недостаточно прав")
+
     responses_from_db = await response_repository.retrieve_many(limit=limit, skip=skip)
 
     result = []
@@ -51,14 +71,20 @@ async def get_by_user_id(
 
     return result
 
-@router.get("/job/{job_id}")
+
+@router.get("/jobs/{job_id}")
 @inject
 async def get_by_job_id(
     job_id: int,
     limit: int = 100,
     skip: int = 0,
+    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
     response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
+    existing_job = await job_repository.retrieve(id=job_id)
+    if existing_job.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недостаточно прав")
     responses_from_db = await response_repository.retrieve_many(limit=limit, skip=skip)
     result = []
     for response in responses_from_db:

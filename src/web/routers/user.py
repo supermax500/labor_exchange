@@ -19,11 +19,14 @@ async def read_users(
     limit: int = 100,
     skip: int = 0,
     user_repository: UserRepository = Depends(Provide[RepositoriesContainer.user_repository]),
+    current_user: User = Depends(get_current_user),
 ) -> list[UserSchema]:
     users_model = await user_repository.retrieve_many(limit, skip)
 
     users_schema = []
     for model in users_model:
+        if model.id != current_user.id and model.is_company == False:
+            continue
         users_schema.append(
             UserSchema(
                 id=model.id,
@@ -39,10 +42,11 @@ async def read_users(
 @inject
 async def read_user(
     user_id: int,
-    limit: int = 100,
-    skip: int = 0,
     user_repository: UserRepository = Depends(Provide[RepositoriesContainer.user_repository]),
+    current_user: User = Depends(get_current_user),
 ) -> UserSchema:
+    if current_user.id != user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недостаточно прав")
     user_model = await user_repository.retrieve(id=user_id)
 
     return UserSchema(
@@ -83,3 +87,4 @@ async def update_user(
 
     except ValueError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
+
