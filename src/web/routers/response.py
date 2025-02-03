@@ -16,7 +16,7 @@ router = APIRouter(prefix="/responses", tags=["responses"])
 async def get_all(
     limit: int = 100,
     skip: int = 0,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.get_repository]),
+    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
     response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
