@@ -133,7 +133,7 @@ async def update(
     response_dto = ResponseSchema(
         id=existing_response.id,
         job_id=existing_response.job_id,
-        user_id=existing_response.id,
+        user_id=existing_response.user_id,
         message=response_update_schema.message,
     )
     updated_repository = await response_repository.update(response_update_schema.id, response_dto)
@@ -156,6 +156,6 @@ async def delete(
     if existing_response is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Несуществующий отклик")
     existing_user = await user_repository.retrieve(id=existing_response.user_id)
-    if existing_user and existing_user.id != current_user.id:
+    if existing_user and existing_response.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недостаточно прав")
     return await response_repository.delete(id=id)

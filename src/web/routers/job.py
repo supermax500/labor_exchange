@@ -43,24 +43,19 @@ async def read_jobs(
 async def read_job(
     job_id: int,
     job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
-) -> list[JobSchema]:
+) -> JobSchema:
 
-    jobs_model = await job_repository.retrieve(id=job_id)
-
-    jobs_schema = []
-    for job in jobs_model:
-        jobs_schema.append(JobSchema(
-            id=job.id,
-            user_id=job.user_id,
-            title=job.title,
-            description=job.description,
-            salary_from=job.salary_from,
-            salary_to=job.salary_to,
-            is_active=job.is_active,
-        ))
-
-    return jobs_schema
-
+    job = await job_repository.retrieve(id=job_id)
+    print(job_id)
+    return JobSchema(
+        id=job.id,
+        user_id=job.user_id,
+        title=job.title,
+        description=job.description,
+        salary_from=job.salary_from,
+        salary_to=job.salary_to,
+        is_active=job.is_active,
+    )
 
 @router.post("")
 @inject
@@ -89,7 +84,7 @@ async def update_job(
     current_user: User = Depends(get_current_user),
 ) -> JobSchema:
 
-    existing_job = job_repository.retrieve(id=job_update_schema.id)
+    existing_job = await job_repository.retrieve(id=job_update_schema.id)
     if existing_job is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Несуществующая вакансия")
     if existing_job.user_id != current_user.id:

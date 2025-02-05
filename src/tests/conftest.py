@@ -66,18 +66,23 @@ async def sa_session():
     session.delete = MagicMock(side_effect=mock_delete)
 
     @asynccontextmanager
-    async def db():
+    async def get_db():
         yield session
 
     session.commit = MagicMock(side_effect=session.flush)
     session.delete = MagicMock(side_effect=mock_delete)
 
 
+    print("BEFORE YIELD")
     try:
-        yield db
+        #with app.container.db.override(get_db):
+        #   yield
+        yield session
     finally:
         await session.close()
+        print("AFTER YIELD")
         await trans.rollback()
+        print("AFTER ROLLBACK")
         await connection.close()
         await engine.dispose()
 

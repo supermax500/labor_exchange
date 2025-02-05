@@ -48,10 +48,10 @@ class JobRepository(IRepositoryAsync):
         return job_model
 
     async def retrieve_many(
-        self, limit: int = 100, skip: int = 0, include_relations: bool = False
+        self, limit: int = 100, skip: int = 0, include_relations: bool = False, **kwargs
     ) -> list[JobModel]:
         async with self.session() as session:
-            query = select(Job).limit(limit).offset(skip)
+            query = select(Job).filter_by(**kwargs).limit(limit).offset(skip)
             if include_relations:
                 query = query.options(selectinload(Job.user)).options(selectinload(Job.responses))
 
@@ -65,9 +65,9 @@ class JobRepository(IRepositoryAsync):
 
         return job_models
 
-    async def update(self, id: int, job_update_dto: JobSchema) -> JobModel:
+    async def update(self, job_update_dto: JobSchema) -> JobModel:
         async with self.session() as session:
-            query = select(Job).filter_by(id=id).limit(1)
+            query = select(Job).filter_by(id=job_update_dto.id).limit(1)
             res = await session.execute(query)
             job_from_db = res.scalars().first()
 

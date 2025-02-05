@@ -63,6 +63,7 @@ async def create_user(
     user_create_dto: UserCreateSchema,
     user_repository: UserRepository = Depends(Provide[RepositoriesContainer.user_repository]),
 ) -> UserSchema:
+    print(user_repository.session)
     user = await user_repository.create(
         user_create_dto, hashed_password=hash_password(user_create_dto.password)
     )
