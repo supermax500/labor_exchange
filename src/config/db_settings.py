@@ -26,7 +26,6 @@ class DBSettings(BaseSettings):
             password=values.data.get("postgres_password"),
             host=values.data.get("postgres_host"),
             port=values.data.get("postgres_port"),
-            #port=5433,
             path=values.data.get("db_name"),
         )
 

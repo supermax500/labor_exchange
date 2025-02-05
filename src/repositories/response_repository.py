@@ -46,10 +46,10 @@ class ResponseRepository(IRepositoryAsync):
         return response_model
 
     async def retrieve_many(
-        self, limit: int = 100, skip: int = 0, include_relations: bool = False
+        self, limit: int = 100, skip: int = 0, include_relations: bool = False, **filters
     ) -> list[ResponseModel]:
         async with self.session() as session:
-            query = select(Response).limit(limit).offset(skip)
+            query = select(Response).filter_by(**filters).limit(limit).offset(skip)
             if include_relations:
                 query = query.options(selectinload(Response.user)).options(selectinload(Response.job))
 

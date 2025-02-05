@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import pytest_asyncio
+from dependency_injector import providers
 from fastapi.testclient import TestClient
 from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -14,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 from config import DBSettings
 from main import app
 from repositories import UserRepository, JobRepository
+from storage.sqlalchemy.client import SqlAlchemyAsync
 from tools.fixtures.users import UserFactory
 
 env_file_name = ".env." + os.environ.get("STAGE", "test")
@@ -21,14 +23,27 @@ env_file_path = Path(__file__).parent.parent.resolve() / env_file_name
 settings = DBSettings(_env_file=env_file_path)
 
 
-@pytest.fixture()
-def client_app():
-    client = TestClient(app)
-    return client
+@pytest.fixture
+def test_app():
+    yield app
+
+
+@pytest.fixture
+def client_app(test_app, sa_session):
+    #def override_get_db():
+    #    yield sa_session
+
+    #app.dependency_overrides[container.db] = override_get_db
+    #app.repo_container.db = override_get_db
+    #app.container.db = override_get_db
+    test_app.container.db.override(providers.Factory(SqlAlchemyAsync, pg_settings=settings))
+    client = TestClient(test_app)
+    yield client
 
 
 @pytest_asyncio.fixture(scope="function")
 async def sa_session():
+    print("setttings = " + str(settings.pg_async_dsn))
     engine = create_async_engine(str(settings.pg_async_dsn))
     connection = await engine.connect()
     trans = await connection.begin()
@@ -56,6 +71,7 @@ async def sa_session():
 
     session.commit = MagicMock(side_effect=session.flush)
     session.delete = MagicMock(side_effect=mock_delete)
+
 
     try:
         yield db
