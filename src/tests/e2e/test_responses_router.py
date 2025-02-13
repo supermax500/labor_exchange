@@ -6,7 +6,7 @@ from web.schemas import JobCreateSchema, ResponseCreateSchema, ResponseUpdateSch
 
 
 def test_get_all_responses(client_app):
-    email = "response_checker3@example.com"
+    email = "response_checker4@example.com"
     password = "12345678"
     user_json, token_json = _register_new_user_and_login(client_app, email, password, name="Response Bot", is_company=False)
 

@@ -9,10 +9,11 @@ import pytest_asyncio
 from dependency_injector import providers
 from fastapi.testclient import TestClient
 from sqlalchemy import inspect
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
 from config import DBSettings
+from interfaces import ISQLAlchemy
 from main import app
 from repositories import UserRepository, JobRepository
 from storage.sqlalchemy.client import SqlAlchemyAsync
@@ -28,21 +29,8 @@ def test_app():
     yield app
 
 
-@pytest.fixture
-def client_app(test_app, sa_session):
-    #def override_get_db():
-    #    yield sa_session
-
-    #app.dependency_overrides[container.db] = override_get_db
-    #app.repo_container.db = override_get_db
-    #app.container.db = override_get_db
-    test_app.container.db.override(providers.Factory(SqlAlchemyAsync, pg_settings=settings))
-    client = TestClient(test_app)
-    yield client
-
-
 @pytest_asyncio.fixture(scope="function")
-async def sa_session():
+async def sa_session(test_app):
     print("setttings = " + str(settings.pg_async_dsn))
     engine = create_async_engine(str(settings.pg_async_dsn))
     connection = await engine.connect()
@@ -69,22 +57,29 @@ async def sa_session():
     async def get_db():
         yield session
 
+
     session.commit = MagicMock(side_effect=session.flush)
     session.delete = MagicMock(side_effect=mock_delete)
 
+    with test_app.container.db.override(get_db):
+        yield
 
-    print("BEFORE YIELD")
-    try:
-        #with app.container.db.override(get_db):
-        #   yield
-        yield session
-    finally:
-        await session.close()
-        print("AFTER YIELD")
-        await trans.rollback()
-        print("AFTER ROLLBACK")
-        await connection.close()
-        await engine.dispose()
+    session.rollback()
+    session.close()
+
+
+    # print("BEFORE YIELD")
+    # try:
+    #     #with app.container.db.override(get_db):
+    #     #   yield
+    #     yield session
+    # finally:
+    #     await session.close()
+    #     print("AFTER YIELD")
+    #     await trans.rollback()
+    #     print("AFTER ROLLBACK")
+    #     await connection.close()
+    #     await engine.dispose()
 
 
 @pytest_asyncio.fixture(scope="function")

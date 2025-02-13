@@ -2,9 +2,15 @@ from decimal import Decimal
 
 import pytest
 from starlette.exceptions import HTTPException
+from starlette.testclient import TestClient
 
 from tests.e2e.test_user_router import _register_new_user_and_login
 from web.schemas import JobCreateSchema, JobUpdateSchema
+
+
+@pytest.fixture
+def client_app(test_app, sa_session):
+    return TestClient(test_app)
 
 
 def test_get_all_jobs(client_app):
