@@ -1,26 +1,27 @@
+import asyncio
 from decimal import Decimal
 
 import pytest
-from starlette.exceptions import HTTPException
-from starlette.testclient import TestClient
 
 from tests.e2e.test_user_router import _register_new_user_and_login
 from web.schemas import JobCreateSchema, JobUpdateSchema
 
+# @pytest.fixture
+# def client_app(test_app, sa_session):
+#     return TestClient(test_app)
 
-@pytest.fixture
-def client_app(test_app, sa_session):
-    return TestClient(test_app)
 
-
-def test_get_all_jobs(client_app):
+@pytest.mark.asyncio
+async def test_get_all_jobs(client_app):
+    print(f"test_job_router 15: event loop id {id(asyncio.get_event_loop())}")
     jobs_response = client_app.get("/jobs")
     assert jobs_response.status_code == 200
     print(jobs_response.json())
 
 
 def test_create_get_update_and_delete_job(client_app):
-    email = "job12@example.com"
+    print(f"test_job_router 22: event loop id {id(asyncio.get_event_loop())}")
+    email = "job18@example.com"
     password = "12345678"
     job_title = "Python jr."
     job_description = "Hiring a dev, needed skills: Postgres, Docker etc"

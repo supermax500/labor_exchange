@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import get_current_user
 from dependencies.containers import RepositoriesContainer
+from repositories import JobRepository, UserRepository
+from repositories.response_repository import ResponseRepository
 from storage.sqlalchemy.tables import Response, User
 from web.schemas.response import ResponseSchema, ResponseCreateSchema, ResponseUpdateSchema
 
@@ -16,8 +18,8 @@ router = APIRouter(prefix="/responses", tags=["responses"])
 async def get_all(
     limit: int = 100,
     skip: int = 0,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
     responses_from_db = await response_repository.retrieve_many(limit=limit, skip=skip)
@@ -41,7 +43,7 @@ async def get_all(
 @inject
 async def get_by_id(
     id: int,
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> ResponseSchema:
     result = await response_repository.retrieve(id=id)
@@ -56,7 +58,7 @@ async def get_by_user_id(
     user_id: int,
     limit: int = 100,
     skip: int = 0,
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
     if user_id != current_user.id:
@@ -78,8 +80,8 @@ async def get_by_job_id(
     job_id: int,
     limit: int = 100,
     skip: int = 0,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> list[ResponseSchema]:
     existing_job = await job_repository.retrieve(id=job_id)
@@ -98,8 +100,8 @@ async def get_by_job_id(
 @inject
 async def create(
     response_create_schema: ResponseCreateSchema,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> ResponseSchema:
 
@@ -117,8 +119,8 @@ async def create(
 @inject
 async def update(
     response_update_schema: ResponseUpdateSchema,
-    user_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.user_repository]),
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    user_repository: UserRepository = Depends(Provide[RepositoriesContainer.user_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> ResponseSchema:
 
@@ -147,8 +149,8 @@ async def update(
 @inject
 async def delete(
     id: int,
-    user_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.user_repository]),
-    response_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.response_repository]),
+    user_repository: UserRepository = Depends(Provide[RepositoriesContainer.user_repository]),
+    response_repository: ResponseRepository = Depends(Provide[RepositoriesContainer.response_repository]),
     current_user: User = Depends(get_current_user),
 ) -> ResponseSchema:
 

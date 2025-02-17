@@ -1,3 +1,4 @@
+import asyncio
 from dataclasses import asdict
 
 from dependency_injector.wiring import Provide, inject
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dependencies import get_current_user
 from dependencies.containers import RepositoriesContainer
+from repositories import JobRepository
 from storage.sqlalchemy.tables import Job
 from web.schemas.job import JobSchema, JobCreateSchema, JobUpdateSchema
 from models.user import User
@@ -18,9 +20,10 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 async def read_jobs(
     limit: int = 100,
     skip: int = 0,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
 ) -> list[JobSchema]:
 
+    print(f"routers/job.py 26: event loop id {id(asyncio.get_event_loop())}")
     jobs_model = await job_repository.retrieve_many(limit=limit, skip=skip)
 
     jobs_schema = []
@@ -42,7 +45,7 @@ async def read_jobs(
 @inject
 async def read_job(
     job_id: int,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
 ) -> JobSchema:
 
     job = await job_repository.retrieve(id=job_id)
@@ -61,7 +64,7 @@ async def read_job(
 @inject
 async def create_job(
     job_create_schema: JobCreateSchema,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
     current_user: User = Depends(get_current_user),
 ) -> JobSchema:
 
@@ -80,7 +83,7 @@ async def create_job(
 @inject
 async def update_job(
     job_update_schema: JobUpdateSchema,
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
     current_user: User = Depends(get_current_user),
 ) -> JobSchema:
 
@@ -106,7 +109,7 @@ async def update_job(
 async def delete(
     id: int,
     user_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.user_repository]),
-    job_repository: RepositoriesContainer = Depends(Provide[RepositoriesContainer.job_repository]),
+    job_repository: JobRepository = Depends(Provide[RepositoriesContainer.job_repository]),
     current_user: User = Depends(get_current_user),
 ) -> JobSchema:
 

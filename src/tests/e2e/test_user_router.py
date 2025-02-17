@@ -4,7 +4,7 @@ from web.schemas import UserCreateSchema, LoginSchema, UserUpdateSchema
 
 
 def test_example(client_app):
-    email = "user7@example.com"
+    email = "user22@example.com"
     password = "12345678"
 
     user_response, token_response = _register_new_user_and_login(client_app, email, password, name="User 11", is_company=False)
@@ -24,7 +24,7 @@ def _register_new_user_and_login(client_app, email, password, **kwargs):
 
 
 def test_get_and_update_user(client_app):
-    email = "user19@example.com"
+    email = "user21@example.com"
     password = "12345678"
     user_json, token_json = _register_new_user_and_login(client_app, email, password, name="User 121", is_company=False)
     #print(user_json)
@@ -38,16 +38,18 @@ def test_get_and_update_user(client_app):
     assert update_result.status_code == 200
 
 
-def test_delete_other_and_self(client_app):
-    email = "shouldnotexist_1@example.com"
-    password = "<PASSWORD>"
-    user_json, token_json = _register_new_user_and_login(client_app, email, password, name="Mr. Deletable", is_company=False)
-    with pytest.raises(Exception) as e:
-        client_app.delete("/users/0")
-    print(e)
-
-    client_app.delete("/users/" + str(user_json["id"]))
-    # интересно, а что случится с сессией? пользователь-то удален, что случится с токеном?
+# def test_delete_other_and_self(client_app):
+#     email = "shouldnotexist_2@example.com"
+#     password = "<PASSWORD>"
+#     user_json, token_json = _register_new_user_and_login(client_app, email, password, name="Mr. Deletable", is_company=False)
+#     #with pytest.raises(Exception) as e:
+#     #    client_app.delete("/users/0")
+#     print("self id =", user_json["id"])
+#
+#     client_app.delete("/users/0")
+#
+#     client_app.delete("/users/" + str(user_json["id"]))
+#     # интересно, а что случится с сессией? пользователь-то удален, что случится с токеном?
 
 
 

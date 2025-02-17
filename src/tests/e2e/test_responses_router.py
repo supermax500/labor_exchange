@@ -16,7 +16,7 @@ def test_get_all_responses(client_app):
 
 
 def test_create_get_update_and_delete_response(client_app):
-    email = "response_bot9@example.com"
+    email = "response_bot10@example.com"
     password = "12345678"
     job_create_schema = JobCreateSchema(title="Example Job", description="Example Job Description")
     response_message = "Test message"
