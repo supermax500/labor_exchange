@@ -15,7 +15,7 @@ class JobSchema(BaseModel):
     is_active: bool | None = False
 
 
-def valid_salary_range(salary_to: Decimal, validation_context: ValidationInfo) -> None:
+def valid_salary_range(salary_to: Decimal, validation_context: ValidationInfo) -> Decimal:
     a = validation_context.data["salary_from"]
     b = salary_to
     if a is not None and b is not None:
@@ -23,7 +23,7 @@ def valid_salary_range(salary_to: Decimal, validation_context: ValidationInfo) -
             raise ValueError("Salary must be non-negative")
         if a > b:
             raise ValueError("Bad salary range")
-    #return self
+    return salary_to
 
 
 class JobCreateSchema(BaseModel):

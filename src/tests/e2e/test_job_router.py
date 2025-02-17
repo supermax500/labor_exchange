@@ -11,8 +11,7 @@ from web.schemas import JobCreateSchema, JobUpdateSchema
 #     return TestClient(test_app)
 
 
-@pytest.mark.asyncio
-async def test_get_all_jobs(client_app):
+def test_get_all_jobs(client_app):
     print(f"test_job_router 15: event loop id {id(asyncio.get_event_loop())}")
     jobs_response = client_app.get("/jobs")
     assert jobs_response.status_code == 200
@@ -45,23 +44,17 @@ def test_create_get_update_and_delete_job(client_app):
         client_app.put("/jobs/",
                        data=JobUpdateSchema(id=new_job_json["id"], salary_from=Decimal(100), salary_to=Decimal(50)).model_dump_json(),
                        headers={"Authorization": f"Bearer {token_json["access_token"]}"})
-    update_result = client_app.put("/jobs/", data=JobUpdateSchema(id=new_job_json["id"], salary_from=Decimal(job_salary_from), salary_to=Decimal(job_salary_to)).model_dump_json(), headers={"Authorization": f"Bearer {token_json["access_token"]}"})
+
+    job_update_schema = JobUpdateSchema(id=new_job_json["id"], salary_from=Decimal(job_salary_from), salary_to=Decimal(job_salary_to))
+    update_result = client_app.put("/jobs/", data=job_update_schema.model_dump_json(), headers={"Authorization": f"Bearer {token_json["access_token"]}"})
     job_json2 = update_result.json()
     assert update_result.status_code == 200
     assert int(Decimal(job_json2["salary_from"])) == job_salary_from
-    try:
-        # TODO: fix null salary_to
-        assert int(Decimal(job_json2["salary_to"])) == job_salary_to
-    except Exception as e:
-        print(e)
+    assert int(Decimal(job_json2["salary_to"])) == job_salary_to
 
     delete_result = client_app.delete(f"/jobs/{new_job_json["id"]}", headers={"Authorization": f"Bearer {token_json["access_token"]}"})
     assert delete_result.status_code == 200
     with pytest.raises(Exception):
         get_result_2 = client_app.get(f"/jobs/{new_job_json["id"]}")
-        # assert get_result_2.status_code == 404
 
 
-# @pytest.fixture
-# def auth_token(client_app):
-#     data = {"email": EmailStr(), "password": }
