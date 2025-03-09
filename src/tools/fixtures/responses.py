@@ -7,7 +7,6 @@ from tools.fixtures.jobs import JobFactory
 from tools.fixtures.users import UserFactory
 
 
-
 class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Response
@@ -16,4 +15,3 @@ class ResponseFactory(factory.alchemy.SQLAlchemyModelFactory):
     job = factory.SubFactory(JobFactory)
     user = factory.SubFactory(UserFactory)
     message = factory.Faker("sentence")
-    created_at = factory.LazyFunction(datetime.utcnow)

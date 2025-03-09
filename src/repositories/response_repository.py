@@ -9,17 +9,16 @@ from models import Job as JobModel
 from models import Response as ResponseModel
 from models import User as UserModel
 from storage.sqlalchemy.tables import Response
-from web.schemas import ResponseCreateSchema, ResponseUpdateSchema
+from web.schemas import ResponseCreateSchema, ResponseSchema, ResponseUpdateSchema
 
 
 class ResponseRepository(IRepositoryAsync):
     def __init__(self, session: Callable[..., AbstractContextManager[Session]]):
         self.session = session
 
-    async def create(self, response_create_dto: ResponseCreateSchema) -> ResponseModel:
+    async def create(self, response_create_dto: ResponseSchema) -> ResponseModel:
         async with self.session() as session:
             response = Response(
-                id=response_create_dto.id,
                 job_id=response_create_dto.job_id,
                 user_id=response_create_dto.user_id,
                 message=response_create_dto.message,
@@ -35,7 +34,9 @@ class ResponseRepository(IRepositoryAsync):
         async with self.session() as session:
             query = select(Response).filter_by(**kwargs).limit(1)
             if include_relations:
-                query = query.options(selectinload(Response.user)).options(selectinload(Response.job))
+                query = query.options(selectinload(Response.user)).options(
+                    selectinload(Response.job)
+                )
 
             res = await session.execute(query)
             response_from_db = res.scalars().first()
@@ -46,24 +47,28 @@ class ResponseRepository(IRepositoryAsync):
         return response_model
 
     async def retrieve_many(
-        self, limit: int = 100, skip: int = 0, include_relations: bool = False
+        self, limit: int = 100, skip: int = 0, include_relations: bool = False, **filters
     ) -> list[ResponseModel]:
         async with self.session() as session:
-            query = select(Response).limit(limit).offset(skip)
+            query = select(Response).filter_by(**filters).limit(limit).offset(skip)
             if include_relations:
-                query = query.options(selectinload(Response.user)).options(selectinload(Response.job))
+                query = query.options(selectinload(Response.user)).options(
+                    selectinload(Response.job)
+                )
 
             res = await session.execute(query)
             responses_from_db = res.scalars().all()
 
         response_models = []
         for response in responses_from_db:
-            model = self.__to_response_model(response_from_db=response, include_relations=include_relations)
+            model = self.__to_response_model(
+                response_from_db=response, include_relations=include_relations
+            )
             response_models.append(model)
 
         return response_models
 
-    async def update(self, id: int, response_update_dto: ResponseUpdateSchema) -> ResponseModel:
+    async def update(self, id: int, response_update_dto: ResponseSchema) -> ResponseModel:
         async with self.session() as session:
             query = select(Response).filter_by(id=id).limit(1)
             res = await session.execute(query)
@@ -72,9 +77,21 @@ class ResponseRepository(IRepositoryAsync):
             if not response_from_db:
                 raise ValueError("Вакансия не найдена")
 
-            job_id = response_update_dto.job_id if response_update_dto.job_id is not None else response_from_db.job_id
-            user_id = response_update_dto.user_id if response_update_dto.user_id is not None else response_from_db.user_id
-            message = response_update_dto.message if response_update_dto.message is not None else response_update_dto.message
+            job_id = (
+                response_update_dto.job_id
+                if response_update_dto.job_id is not None
+                else response_from_db.job_id
+            )
+            user_id = (
+                response_update_dto.user_id
+                if response_update_dto.user_id is not None
+                else response_from_db.user_id
+            )
+            message = (
+                response_update_dto.message
+                if response_update_dto.message is not None
+                else response_update_dto.message
+            )
 
             response_from_db.job_id = job_id
             response_from_db.user_id = user_id
@@ -86,7 +103,7 @@ class ResponseRepository(IRepositoryAsync):
 
         return self.__to_response_model(response_from_db, include_relations=False)
 
-    async def delete(self, id: int) -> ResponseModel: # ???
+    async def delete(self, id: int) -> ResponseModel:
         async with self.session() as session:
             query = select(Response).filter_by(id=id).limit(1)
             res = await session.execute(query)
@@ -101,7 +118,9 @@ class ResponseRepository(IRepositoryAsync):
         return self.__to_response_model(response_from_db, include_relations=False)
 
     @staticmethod
-    def __to_response_model(response_from_db: Response, include_relations: bool = False) -> ResponseModel:
+    def __to_response_model(
+        response_from_db: Response, include_relations: bool = False
+    ) -> ResponseModel:
         response_job = None
         response_user = None
         response_model = None

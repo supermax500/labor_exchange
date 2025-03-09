@@ -3,7 +3,7 @@ version: '3'
 services:
   postgres:
     container_name: postgres-laborexchange
-    image: postgres
+    image: postgres:16.4
     environment:
       POSTGRES_DB: "labor-exchange"
       POSTGRES_USER: "admin"
@@ -16,7 +16,7 @@ services:
 
   postgres-test:
     container_name: postgres-laborexchange-test
-    image: postgres
+    image: postgres:16.4
     environment:
       POSTGRES_DB: "labor-exchange"
       POSTGRES_USER: "admin"

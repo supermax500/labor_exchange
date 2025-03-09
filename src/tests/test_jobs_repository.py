@@ -1,13 +1,8 @@
 from decimal import Decimal
 
 import pytest
-from pydantic import ValidationError
-from sqlalchemy.exc import IntegrityError
-
-from repositories import JobRepository
 from storage.sqlalchemy.tables import Response
 from tools.fixtures.jobs import JobFactory
-from tools.security import hash_password
 from web.schemas import JobUpdateSchema, JobCreateSchema
 
 
@@ -20,7 +15,6 @@ async def test_get_all(job_repository, sa_session):
 
     all_jobs = await job_repository.retrieve_many()
     assert all_jobs
-    #assert len(all_jobs) == 1
 
     job_from_repo = all_jobs[0]
     assert job_from_repo.title == job.title
