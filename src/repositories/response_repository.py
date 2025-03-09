@@ -5,11 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from interfaces import IRepositoryAsync
-from models import Job as JobModel
 from models import Response as ResponseModel
-from models import User as UserModel
 from storage.sqlalchemy.tables import Response
-from web.schemas import ResponseCreateSchema, ResponseSchema, ResponseUpdateSchema
+from web.schemas import ResponseSchema
 
 
 class ResponseRepository(IRepositoryAsync):
@@ -121,14 +119,9 @@ class ResponseRepository(IRepositoryAsync):
     def __to_response_model(
         response_from_db: Response, include_relations: bool = False
     ) -> ResponseModel:
-        response_job = None
-        response_user = None
         response_model = None
 
         if response_from_db:
-            if include_relations:
-                response_job = response_from_db.job
-                response_user = response_from_db.user
 
             response_model = ResponseModel(
                 id=response_from_db.id,

@@ -1,9 +1,7 @@
 import pytest
-from sqlalchemy.orm.persistence import delete_obj
 
 import storage.sqlalchemy.tables.jobs
 from tools.fixtures.jobs import JobFactory
-from web.routers.job import delete
 
 
 def _job_orm_to_dict(job_orm: storage.sqlalchemy.tables.jobs.Job) -> dict:
@@ -62,7 +60,11 @@ async def test_put_job(client_with_fake_db, sa_session, current_user, access_tok
         session.flush()
 
         updated_job = JobFactory.build(id=job.id, salary_from=300, salary_to=500)
-        job_update_response = await client_with_fake_db.put("/jobs", json=_job_orm_to_dict(updated_job), headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+        job_update_response = await client_with_fake_db.put(
+            "/jobs",
+            json=_job_orm_to_dict(updated_job),
+            headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+        )
         assert job_update_response.status_code == 200
 
 
@@ -71,7 +73,11 @@ async def test_put_job_no_exist(client_with_fake_db, sa_session, current_user, a
     job = JobFactory.build()
     nonexistent_id = job.id
     job = JobFactory.build(id=nonexistent_id, user=current_user, salary_from=100, salary_to=200)
-    job_update_response = await client_with_fake_db.put("/jobs", json=_job_orm_to_dict(job), headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+    job_update_response = await client_with_fake_db.put(
+        "/jobs",
+        json=_job_orm_to_dict(job),
+        headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+    )
     assert job_update_response.status_code == 403
 
 
@@ -83,7 +89,11 @@ async def test_put_job_no_priv(client_with_fake_db, sa_session, current_user, ac
         session.flush()
 
         updated_job = JobFactory.build(id=job.id, salary_from=300, salary_to=500)
-        job_update_response = await client_with_fake_db.put("/jobs", json=_job_orm_to_dict(updated_job), headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+        job_update_response = await client_with_fake_db.put(
+            "/jobs",
+            json=_job_orm_to_dict(updated_job),
+            headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+        )
         assert job_update_response.status_code == 403
 
 
@@ -94,7 +104,10 @@ async def test_delete_job(client_with_fake_db, sa_session, current_user, access_
         session.add(job)
         session.flush()
 
-        delete_response = await client_with_fake_db.delete(f"/jobs/{job.id}", headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+        delete_response = await client_with_fake_db.delete(
+            f"/jobs/{job.id}",
+            headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+        )
         assert delete_response.status_code == 200
 
 
@@ -102,7 +115,10 @@ async def test_delete_job(client_with_fake_db, sa_session, current_user, access_
 async def test_delete_job_no_exist(client_with_fake_db, sa_session, current_user, access_token):
     job = JobFactory.build(user=current_user, salary_from=100, salary_to=200)
 
-    delete_response = await client_with_fake_db.delete(f"/jobs/{job.id}", headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+    delete_response = await client_with_fake_db.delete(
+        f"/jobs/{job.id}",
+        headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+    )
     assert delete_response.status_code == 403
 
 
@@ -113,6 +129,8 @@ async def test_delete_job_no_priv(client_with_fake_db, sa_session, current_user,
         session.add(job)
         session.flush()
 
-        delete_response = await client_with_fake_db.delete(f"/jobs/{job.id}", headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+        delete_response = await client_with_fake_db.delete(
+            f"/jobs/{job.id}",
+            headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+        )
         assert delete_response.status_code == 401
-

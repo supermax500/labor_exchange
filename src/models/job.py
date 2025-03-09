@@ -4,6 +4,7 @@ from decimal import Decimal
 from models.response import Response
 from models.user import User
 
+
 @dataclass
 class Job:
     id: int

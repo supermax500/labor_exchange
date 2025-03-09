@@ -25,7 +25,7 @@ async def read_users(
 
     users_schema = []
     for model in users_model:
-        if model.id != current_user.id and model.is_company == False:
+        if model.id != current_user.id and model.is_company is False:
             continue
         users_schema.append(
             UserSchema(
@@ -88,4 +88,3 @@ async def update_user(
 
     except ValueError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
-

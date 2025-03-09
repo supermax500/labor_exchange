@@ -1,9 +1,10 @@
 from decimal import Decimal
 
 import pytest
+
 from storage.sqlalchemy.tables import Response
 from tools.fixtures.jobs import JobFactory
-from web.schemas import JobUpdateSchema, JobCreateSchema
+from web.schemas import JobCreateSchema, JobUpdateSchema
 
 
 @pytest.mark.asyncio
@@ -35,10 +36,10 @@ async def test_get_all_with_relations(job_repository, sa_session):
 
     all_jobs = await job_repository.retrieve_many(include_relations=True)
     assert all_jobs
-    #assert len(all_jobs) > 1
+    # assert len(all_jobs) > 1
 
     job_from_repo = all_jobs[0]
-    #assert len(job_from_repo.jobs) == 1
+    # assert len(job_from_repo.jobs) == 1
     assert job_from_repo.responses[0].id == response.id
     assert job_from_repo.id == job.id
     assert job_from_repo.user_id == job.user_id
@@ -89,10 +90,10 @@ async def test_create_bad_salary(job_repository, sa_session, user_repository):
             salary_to=10000,
             is_active=False,
         )
-    #created_job = await job_repository.create(job_create_dto=job)
-    #assert created_job is not None
-    #assert created_job.user_id == user_id
-    #assert created_job.title == "VakBelyash"
+    # created_job = await job_repository.create(job_create_dto=job)
+    # assert created_job is not None
+    # assert created_job.user_id == user_id
+    # assert created_job.title == "VakBelyash"
 
 
 @pytest.mark.asyncio

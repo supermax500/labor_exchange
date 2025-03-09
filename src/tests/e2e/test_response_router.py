@@ -1,5 +1,4 @@
 import pytest
-from faker.proxy import Faker
 
 import storage.sqlalchemy.tables.responses
 from tools.fixtures.jobs import JobFactory
@@ -91,7 +90,7 @@ async def test_get_responses_by_job_id(client_with_fake_db, sa_session, current_
 
 
 @pytest.mark.asyncio
-async def test_get_responses_by_user_id_no_perm(client_with_fake_db, sa_session):
+async def test_get_responses_by_job_id_no_perm(client_with_fake_db, sa_session):
     async with sa_session() as session:
         response = ResponseFactory.build()
         session.add(response)

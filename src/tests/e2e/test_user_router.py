@@ -69,7 +69,11 @@ async def test_register_user(client_with_fake_db, sa_session):
 @pytest.mark.asyncio
 async def test_put_user(client_with_fake_db, sa_session, current_user, access_token):
     updated_user = UserFactory.build(id=current_user.id)
-    user_update_response = await client_with_fake_db.put("/users", json=_user_orm_to_dict(updated_user), headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+    user_update_response = await client_with_fake_db.put(
+        "/users",
+        json=_user_orm_to_dict(updated_user),
+        headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+    )
     assert user_update_response.status_code == 200
 
 
@@ -80,6 +84,9 @@ async def test_put_user_no_priv(client_with_fake_db, sa_session, current_user, a
         session.add(user)
         session.flush()
         updated_user = UserFactory.build(email=user.email)
-        user_update_response = await client_with_fake_db.put("/users", json=_user_orm_to_dict(updated_user), headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"})
+        user_update_response = await client_with_fake_db.put(
+            "/users",
+            json=_user_orm_to_dict(updated_user),
+            headers={"Authorization": f"{access_token.token_type} {access_token.access_token}"},
+        )
         assert user_update_response.status_code == 401
-

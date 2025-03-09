@@ -23,7 +23,7 @@ def valid_salary_range(salary_to: Decimal, validation_context: ValidationInfo) -
             raise ValueError("Salary must be non-negative")
         if a > b:
             raise ValueError("Bad salary range")
-    #return self
+    # return self
 
 
 class JobCreateSchema(BaseModel):
@@ -33,7 +33,7 @@ class JobCreateSchema(BaseModel):
     salary_to: Decimal | None = None
     is_active: bool | None = False
 
-    check_salary = field_validator("salary_to", mode='after')(valid_salary_range)
+    check_salary = field_validator("salary_to", mode="after")(valid_salary_range)
 
 
 class JobUpdateSchema(BaseModel):
@@ -44,4 +44,4 @@ class JobUpdateSchema(BaseModel):
     salary_to: Optional[Decimal] = None
     is_active: Optional[bool] = False
 
-    check_salary = field_validator("salary_to", mode='after')(valid_salary_range)
+    check_salary = field_validator("salary_to", mode="after")(valid_salary_range)

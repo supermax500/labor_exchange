@@ -8,7 +8,7 @@ from interfaces import IRepositoryAsync
 from models import Job as JobModel
 from models import Response as ResponseModel
 from storage.sqlalchemy.tables import Job
-from web.schemas import JobCreateSchema, JobUpdateSchema, JobSchema
+from web.schemas import JobSchema
 
 
 class JobRepository(IRepositoryAsync):
@@ -18,13 +18,13 @@ class JobRepository(IRepositoryAsync):
     async def create(self, job_create_dto: JobSchema) -> JobModel:
         async with self.session() as session:
             job = Job(
-                #id=job_create_dto.id,
+                # id=job_create_dto.id,
                 user_id=job_create_dto.user_id,
                 title=job_create_dto.title,
                 description=job_create_dto.description,
                 salary_from=job_create_dto.salary_from,
                 salary_to=job_create_dto.salary_to,
-                is_active=job_create_dto.is_active
+                is_active=job_create_dto.is_active,
             )
 
             session.add(job)
@@ -75,10 +75,26 @@ class JobRepository(IRepositoryAsync):
                 raise ValueError("Вакансия не найдена")
 
             title = job_update_dto.title if job_update_dto.title is not None else job_from_db.title
-            description = job_update_dto.description if job_update_dto.description is not None else job_from_db.description
-            salary_from = job_update_dto.salary_from if job_update_dto.salary_from is not None else job_from_db.salary_from
-            salary_to = job_update_dto.salary_to if job_update_dto.salary_to is not None else job_from_db.salary_to
-            is_active = job_update_dto.is_active if job_update_dto.is_active is not None else job_from_db.is_active
+            description = (
+                job_update_dto.description
+                if job_update_dto.description is not None
+                else job_from_db.description
+            )
+            salary_from = (
+                job_update_dto.salary_from
+                if job_update_dto.salary_from is not None
+                else job_from_db.salary_from
+            )
+            salary_to = (
+                job_update_dto.salary_to
+                if job_update_dto.salary_to is not None
+                else job_from_db.salary_to
+            )
+            is_active = (
+                job_update_dto.is_active
+                if job_update_dto.is_active is not None
+                else job_from_db.is_active
+            )
 
             job_from_db.title = title
             job_from_db.description = description
@@ -125,7 +141,6 @@ class JobRepository(IRepositoryAsync):
                     )
                     for response in job_from_db.responses
                 ]
-
 
             job_model = JobModel(
                 id=job_from_db.id,
